@@ -1,17 +1,23 @@
 import time
 
 import pyautogui
-from pyvirtualdisplay import Display
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
-# Start virtual display
-display = Display(visible=0, size=(1024, 768))
-display.start()
+options = Options()
 
-# Initialize Selenium WebDriver
-driver = webdriver.Firefox()
+# normally most chrome chrome functionality would work fine, even without a display,
+# as long as we start it with the "headless" option. But to confirm the virtual display works, 
+# we'll omit the headless option
+#
+# options.add_argument("--headless")
+
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
 
 try:
+    driver = webdriver.Chrome(options=options)
     # Navigate to a website
     driver.get("https://www.example.com")
 
@@ -25,7 +31,7 @@ try:
     pyautogui.click()
 
     # Take a screenshot
-    pyautogui.screenshot("screenshot.png")
+    pyautogui.screenshot("screenshots/screenshot.png")
 
     print("Actions completed successfully")
 
@@ -35,4 +41,3 @@ except Exception as e:
 finally:
     # Clean up
     driver.quit()
-    display.stop()

@@ -1,7 +1,30 @@
-# testpyautogui 
+# How to run pyautogui headless in docker
 
-## Requirements
-- [Docker](https://docs.docker.com/get-started/get-docker/)
+## Steps
 
-## Running the test
-- `docker compose -f "docker-compose.yml" up -d --build`
+- Build an image
+
+  - `docker build -t <IMAGE_NAME> .`
+
+- Run an interactive container from this image
+
+  - `docker run -it --name <CONTAINER_NAME> <IMAGE_NAME>`
+
+- start a virtual display (with given arbitary display number)
+
+  - `source ./start_vd.sh 8`
+
+- Run the virtual environment
+
+  - `source /opt/venv/bin/activate`
+
+- Stop the virtual display (started with the number chosen above)
+
+  - `./stop_vd.sh 8`
+
+- Exit the shell by `Ctrl + C`
+
+
+## Copy files from docker container to local dir
+
+- `docker cp <CONTAINER_NAME>:/home/screenshots .`

@@ -1,26 +1,64 @@
-# Use a lightweight Python image
-FROM python:3.9-slim
+FROM ubuntu:22.04
 
-# Install necessary dependencies
-RUN apt-get update && apt-get install -y \
-    xvfb \
-    x11-utils \
-    x11vnc \
-    wget \
+# Set environment variable to stop tzdata asking questions
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
     ca-certificates \
+    xauth \
+    xvfb \
+    openbox \
+    psmisc \
+    procps \
+    vim \
+    python3 \
+    python3-pip \
+    python3-venv \
+    wget \
+    unzip \
     fonts-liberation \
-    --no-install-recommends
-
-# Install Chromium
-RUN apt-get update && apt-get install -y chromium && \
+    libasound2 \
+    libgbm1 \
+    libnspr4 \
+    libnss3 \
+    libu2f-udev \
+    xdg-utils \
+    python3-tk \
+    python3-dev \
+    gnome-screenshot \
+    libvulkan1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install pyautogui and its dependencies
-RUN pip install pyautogui pillow
+# For Xauth Authority error
+RUN touch ~/.Xauthority
 
-# Set up environment variables
-ENV DISPLAY=:99
-ENV XAUTHORITY=""
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip setuptools wheel && \
+    /opt/venv/bin/pip install selenium pyautogui
 
-# Start Xvfb and then run the command
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x16 & tail -f /dev/null"]
+# Download and install Google Chrome
+RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get update && \
+    apt-get install -y ./google-chrome-stable_current_amd64.deb || true && \
+    apt-get install -f -y && \
+    rm google-chrome-stable_current_amd64.deb
+
+# Download and install ChromeDriver
+RUN wget -q https://chromedriver.storage.googleapis.com/126.0.6478.126/chromedriver_linux64.zip && \
+    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
+    chmod +x /usr/local/bin/chromedriver && \
+    rm chromedriver_linux64.zip || true
+
+WORKDIR /home
+
+COPY script/start_vd.sh /home/start_vd.sh
+COPY script/stop_vd.sh /home/stop_vd.sh
+COPY app.py /home/app.py
+
+RUN chmod +x /home/start_vd.sh && \
+    chmod +x /home/stop_vd.sh
+
+RUN mkdir /home/screenshots
+
+ENTRYPOINT ["/bin/bash"]
