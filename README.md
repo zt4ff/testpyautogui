@@ -1,4 +1,4 @@
-# How to run pyautogui headless in docker
+# How to run pyautogui in Docker
 
 ## Steps
 
